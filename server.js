@@ -25,9 +25,13 @@ const limiter = rateLimit({
 });
 
 // Middleware
+// CLIENT_URL can be a single origin or a comma-separated list (e.g. the
+// public news site AND the admin panel, which are two different Netlify
+// deployments hitting the same API).
 const allowedOrigins = [
-  process.env.CLIENT_URL,
+  ...(process.env.CLIENT_URL || '').split(',').map(s => s.trim()).filter(Boolean),
   'http://localhost:5173',
+  'http://localhost:5174',
   'http://localhost:5175',
 ];
 
