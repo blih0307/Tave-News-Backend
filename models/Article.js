@@ -10,6 +10,9 @@ const articleSchema = new mongoose.Schema({
     url: { type: String, default: '' },
     publicId: { type: String, default: '' },
     alt: { type: String, default: '' },
+    // Photo attribution shown alongside the image on the public site
+    // (e.g. "Photo: Jane Doe / Tave News", "Photo: Getty Images").
+    credit: { type: String, default: '' },
     // A licensed embed (e.g. "Embed from Getty Images") takes priority
     // over url/publicId when set -- mutually exclusive with an upload,
     // enforced in the admin UI, not the schema.
