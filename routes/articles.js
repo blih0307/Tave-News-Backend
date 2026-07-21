@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {
-  getArticles, getArticle, getAdminArticles, createArticle, updateArticle, deleteArticle, getRelated,
+  getArticles, getArticle, getAdminArticles, getArticleStats, createArticle, updateArticle, deleteArticle, getRelated,
   getHomeFeed, getAdminHomeLayout, setHomePosition,
 } = require('../controllers/articleController');
 const { protect, authorize } = require('../middleware/auth');
@@ -16,6 +16,7 @@ router.get('/:id/related', getRelated);
 
 // Protected routes
 router.get('/admin/all', protect, getAdminArticles);
+router.get('/admin/stats', protect, getArticleStats);
 router.get('/admin/home-layout', protect, getAdminHomeLayout);
 router.put('/:id/home-position', protect, authorize('admin', 'editor', 'writer'), setHomePosition);
 router.post('/', protect, authorize('admin', 'editor', 'writer'), createArticle);
