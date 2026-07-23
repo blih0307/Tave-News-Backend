@@ -10,7 +10,7 @@ const ARTICLE_POPULATE = [
 const SIDE_NEWS_COUNT = 4;
 const LATEST_NEWS_HOME_COUNT = 6;
 const TOP_STORIES_HOME_COUNT = 6;
-const TOP_STORIES_TABS = 5; // how many top-level categories get a Top Stories tab
+const TOP_STORIES_TABS = 12; // how many top-level categories can get a Top Stories tab
 
 // @desc    Get all published articles (public)
 // @route   GET /api/articles
@@ -309,6 +309,12 @@ exports.getArticleStats = async (req, res, next) => {
 exports.createArticle = async (req, res, next) => {
   try {
     req.body.author = req.user._id;
+    // Only ONE article site-wide should be breaking news at a time --
+    // demote whichever article currently holds it before creating this one,
+    // same exclusivity pattern as isHero above.
+    if (req.body.isBreaking) {
+      await Article.updateMany({ isBreaking: true }, { $set: { isBreaking: false } });
+    }
     const article = await Article.create(req.body);
     res.status(201).json({ success: true, data: article });
   } catch (error) { next(error); }
@@ -323,6 +329,11 @@ exports.updateArticle = async (req, res, next) => {
     // Writers can only edit their own
     if (req.user.role === 'writer' && article.author.toString() !== req.user._id.toString()) {
       return res.status(403).json({ success: false, message: 'Not authorized to edit this article' });
+    }
+    // Only ONE article site-wide should be breaking news at a time --
+    // demote whichever OTHER article currently holds it (mirrors isHero).
+    if (req.body.isBreaking) {
+      await Article.updateMany({ _id: { $ne: article._id }, isBreaking: true }, { $set: { isBreaking: false } });
     }
     article = await Article.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     res.json({ success: true, data: article });
